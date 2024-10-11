@@ -207,7 +207,10 @@ class RateOrderScreen extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      Get.to(ReviewScreen(), transition: Transition.fade);
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) => ReviewScreen()
+                          )
+                          );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.lightBlue,
