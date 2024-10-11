@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:resturant_app/utils/color.dart';
+import 'package:resturant_app/utils/constants.dart';
 import 'package:resturant_app/widgets/custom_image.dart';
 import 'favorite_box.dart';
 

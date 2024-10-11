@@ -16,6 +16,7 @@ class Homepage extends StatelessWidget {
 
   AppBar _buildAppBar() {
     return AppBar(
+      automaticallyImplyLeading: false,
       backgroundColor: Colors.transparent,
       elevation: 0,
       title: Row(

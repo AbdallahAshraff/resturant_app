@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:resturant_app/screens/reviewing.dart';
 
 class ProductDetails extends StatelessWidget {
   final Map<String, dynamic> product;
@@ -49,7 +50,7 @@ class ProductDetails extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            _buildPriceAndReview(),
+            _buildPriceAndReview(context),
             const SizedBox(height: 10),
             _buildExtras(), // Add the extras section
             const SizedBox(height: 20),
@@ -79,7 +80,7 @@ class ProductDetails extends StatelessWidget {
   }
 
   // Build the price and review section
-  Widget _buildPriceAndReview() {
+  Widget _buildPriceAndReview(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
       child: Row(
@@ -106,6 +107,7 @@ class ProductDetails extends StatelessWidget {
           TextButton(
             onPressed: () {
               // Handle add review logic here
+             Navigator.of(context).push(MaterialPageRoute(builder: (context) => RateOrderScreen() ));
             },
             child: const Text(
               'Add Review',
