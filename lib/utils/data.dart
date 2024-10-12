@@ -1,4 +1,4 @@
-const List meals = [
+/*const List meals = [
   {
     "image":
         "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?ixid=MXwxMjA3fDB8MHxzZWFyY2h8NHx8Zm9vZHxlbnwwfHwwfA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
@@ -95,4 +95,17 @@ const List meals = [
       {"name": "Extra Mango", "price": "1.25"},
     ]
   },
-];
+];*/
+
+import 'package:resturant_app/utils/constants.dart';
+import 'package:resturant_app/utils/model.dart';
+
+Future<List<Meals>> fetchMeals() async {
+  final response = await supabase.from('meals').select();
+  return Meals.converter(response);
+}
+
+Future<List<Comments>> fetchComments() async {
+  final response = await supabase.from('comments').select();
+  return Comments.converter(response);
+}

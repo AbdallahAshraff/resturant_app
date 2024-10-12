@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:resturant_app/utils/constants.dart';
+import 'package:resturant_app/utils/model.dart';
 import 'package:resturant_app/widgets/custom_image.dart';
 import 'favorite_box.dart';
 
 class MealItem extends StatelessWidget {
-  const MealItem({super.key, required this.data, this.onTap});
-  final Map<String, dynamic> data;
+  const MealItem({super.key, required this.meal, this.onTap});
+  final Meals meal;
   final GestureTapCallback? onTap;
 
   @override
@@ -31,7 +32,7 @@ class MealItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CustomImage(
-              data["image"],
+              meal.imageUrl ?? "no image",
               width: 60,
               height: 60,
               radius: 10,
@@ -51,7 +52,7 @@ class MealItem extends StatelessWidget {
     return Column(
       children: <Widget>[
         Text(
-          "\$ ${data["price"]}",
+          "\$ ${meal.price}",
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
@@ -60,10 +61,7 @@ class MealItem extends StatelessWidget {
         const SizedBox(
           height: 10,
         ),
-        FavoriteBox(
-          iconSize: 13,
-          isFavorited: data["is_favorited"],
-        )
+       
       ],
     );
   }
@@ -73,7 +71,7 @@ class MealItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          data["name"],
+          meal.name,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
@@ -94,10 +92,10 @@ class MealItem extends StatelessWidget {
             const SizedBox(
               width: 2,
             ),
-            Text(
+            /*Text(
               data["rate"] + " (" + data["rate_number"] + ")",
               style: const TextStyle(fontSize: 12, color: primary),
-            ),
+            ),*/
           ],
         )
       ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:resturant_app/screens/products_details.dart';
 import 'package:resturant_app/utils/data.dart';
+import 'package:resturant_app/utils/model.dart';
 import 'package:resturant_app/widgets/meal_item.dart';
 
 class Homepage extends StatelessWidget {
@@ -27,9 +28,7 @@ class Homepage extends StatelessWidget {
             child: Container(
               alignment: Alignment.centerLeft,
               child: IconButton(
-                onPressed: () {
-
-                },
+                onPressed: () {},
                 icon: const Icon(
                   Icons.clear_all_rounded,
                   size: 28,
@@ -129,22 +128,35 @@ class Homepage extends StatelessWidget {
 
   _buildFeatured(BuildContext context) {
     return Column(
-      children: List.generate(
-        meals.length,
-        (index) => MealItem(
-          data: meals[index],
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ProductDetails(
-                  meals[index],
-                ),
-              ),
-            );
+      children: [
+        FutureBuilder(
+          future: fetchMeals(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final meals = snapshot.data as List<Meals>;
+              return ListView.builder(
+                shrinkWrap:
+                    true, // Add this to make the ListView work inside a Column
+                itemCount: meals.length,
+                itemBuilder: (context, index) {
+                  final meal = meals[index];
+                  return MealItem(meal: meal ,onTap: (){
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ProductDetails(meal),
+                      ),
+                    );
+                  });
+                },
+              );
+            } else {
+              return Center(child: CircularProgressIndicator());
+            }
           },
         ),
-      ),
+      ],
     );
   }
 }

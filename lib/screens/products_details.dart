@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:resturant_app/screens/reviewing.dart';
+import 'package:resturant_app/utils/model.dart';
 
 class ProductDetails extends StatelessWidget {
-  final Map<String, dynamic> product;
+  final Meals food;
 
-  ProductDetails(this.product, {super.key});
+  ProductDetails(this.food, {super.key});
 
   // Using GetX observable counter for the meal count
   final RxInt mealCount = 1.obs;
@@ -17,14 +18,14 @@ class ProductDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     mealprice.value =
-        double.parse(product['price']); // Initialize base price here
+        double.parse(food.price.toString()); // Initialize base price here
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title:
-            Text(product['name'], style: const TextStyle(color: Colors.black)),
+            Text(food.name, style: const TextStyle(color: Colors.black)),
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SingleChildScrollView(
@@ -36,7 +37,7 @@ class ProductDetails extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
               child: Text(
-                product['name'],
+                food.name,
                 style:
                     const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
@@ -45,14 +46,14 @@ class ProductDetails extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
               child: Text(
-                product['description'],
+                food.description ?? '',
                 style: TextStyle(fontSize: 16, color: Colors.grey[600]),
               ),
             ),
             const SizedBox(height: 20),
             _buildPriceAndReview(context),
             const SizedBox(height: 10),
-            _buildExtras(), // Add the extras section
+            //_buildExtras(), // Add the extras section
             const SizedBox(height: 20),
             _buildCounter(), // Add the counter here using Obx
             const SizedBox(height: 20),
@@ -72,7 +73,7 @@ class ProductDetails extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         image: DecorationImage(
           fit: BoxFit.cover,
-          image: NetworkImage(product['image']),
+          image: NetworkImage(food.imageUrl ?? ''),
         ),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 15),
@@ -98,10 +99,10 @@ class ProductDetails extends StatelessWidget {
             children: [
               const Icon(Icons.star, color: Colors.orange, size: 20),
               const SizedBox(width: 5),
-              Text(
+             /* Text(
                 '${product['rate']} (${product['rate_number']} reviews)',
                 style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-              ),
+              ),*/
             ],
           ),
           TextButton(
@@ -160,7 +161,7 @@ class ProductDetails extends StatelessWidget {
   }
 
   // Build the extras section
-  Widget _buildExtras() {
+  /*Widget _buildExtras() {
     // Check if the product has extras
     if (product.containsKey('extras') &&
         product['extras'] is List &&
@@ -203,7 +204,7 @@ class ProductDetails extends StatelessWidget {
       );
     }
     return const SizedBox.shrink(); // If no extras, return an empty widget
-  }
+  }*/
 
   // Build the "Add to Cart" button
   Widget _buildAddToCartButton() {
@@ -216,7 +217,7 @@ class ProductDetails extends StatelessWidget {
             // Handle add to cart logic here
             Get.snackbar(
               'Added to Cart',
-              '${mealCount.value} ${product['name']} added to cart',
+              '${mealCount.value} ${food.name} added to cart',
               snackPosition: SnackPosition.BOTTOM,
             );
           },

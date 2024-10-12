@@ -46,8 +46,8 @@ class RateOrderScreen extends StatelessWidget {
               // Food Image (Local Directory Version)
               ClipRRect(
                 borderRadius: BorderRadius.circular(20.0),
-                child: Image.asset(
-                  'assets/images/burger.jpg',
+                child: Image.network(
+                  'https://cdn11.bigcommerce.com/s-3xaaslonk2/images/stencil/500x659/products/131/1030/376__03833.1660073838.jpg?c=1',
                   // <-- Replace with your image directory
                   height: 180,
                   width: double.infinity,
