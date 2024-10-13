@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:resturant_app/utils/constants.dart';
+import 'package:resturant_app/utils/data.dart';
+import 'package:resturant_app/utils/model.dart';
 
 class ReviewScreen extends StatelessWidget {
-  final ReviewController controller = Get.put(ReviewController());
+  final Meals food;
 
-  ReviewScreen({super.key});
+  ReviewScreen({
+    super.key,
+    required this.food,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,133 +32,77 @@ class ReviewScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 16.0),
             Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+              child: FutureBuilder<List<Comments>>(
+                future: fetchComments(), // Fetch comments from the database
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('No reviews found.'));
+                  }
 
-                return ListView.builder(
-                  itemCount: controller.reviews.length,
-                  itemBuilder: (context, index) {
-                    final review = controller.reviews[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(review.userProfileUrl),
-                      ),
-                      title: Text(review.userName),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(review.date),
-                          const SizedBox(height: 4),
-                          Text(review.comment),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              }),
+                  final comments = snapshot.data!;
+
+                  return ListView.builder(
+                    itemCount: comments.length,
+                    itemBuilder: (context, index) {
+                      // Reverse order of comments
+                      index = comments.length - index - 1;
+                      final review = comments[index];
+
+                      // Check if the comment belongs to the given meal
+                      if (food.id == review.mealId) {
+                        final formattedTime = DateFormat('yyyy-MM-dd  kk:mm')
+                            .format(review.createdAt ?? DateTime.now());
+
+                        // Fetch the user's name using a FutureBuilder
+                        return FutureBuilder(
+                          future: supabase
+                              .from('users')
+                              .select('username')
+                              .eq('id', review.userId?? 0)
+                              .maybeSingle(), // Fetch single matching user
+                          builder: (context, userSnapshot) {
+                           
+                            if (userSnapshot.hasError) {
+                              return const Text('Error fetching user');
+                            }
+
+                            // Extract username or show 'Anonymous' if not found
+                            final username = userSnapshot.data?['username'] ?? 'Anonymous';
+
+                            return ListTile(
+                              leading: const CircleAvatar(
+                                backgroundImage: NetworkImage(
+                                  'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
+                                ),
+                              ),
+                              title: Text(username), // Display username
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(formattedTime),
+                                  const SizedBox(height: 4),
+                                  Text(review.comment ?? ''),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      }
+                      return const SizedBox.shrink(); // Ignore non-matching meals
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
     );
   }
-}
-
-class ReviewController extends GetxController {
-  var reviews = <Review>[].obs; // Reactive list of reviews
-  var isLoading = true.obs; // For loading state
-  final reviewController = TextEditingController(); // Review input controller
-
-  @override
-  void onInit() {
-    super.onInit();
-    fetchReviews(); // Fetch reviews on init
-  }
-
-  void fetchReviews() async {
-    try {
-      isLoading.value = true;
-      await Future.delayed(const Duration(seconds: 2)); // Simulated delay
-      // Example reviews (replace with API call)
-      var fetchedReviews = [
-        Review(
-          userName: 'Alyce Lambo',
-          date: '25/06/2020',
-          userProfileUrl: 'https://example.com/user1.jpg',
-          comment:
-              'Really convenient and the points system helps benefit loyalty.',
-        ),
-        Review(
-          userName: 'Gonela Solom',
-          date: '22/06/2020',
-          userProfileUrl: 'https://example.com/user2.jpg',
-          comment:
-              'Been a life saver for keeping our sanity during the pandemic.',
-        ),
-        Review(
-          userName: 'Brian C',
-          date: '21/06/2020',
-          userProfileUrl: 'https://example.com/user3.jpg',
-          comment:
-              'Got an intro offer of 50% off first order that did not work...',
-        ),
-        Review(
-          userName: 'Helsmar E',
-          date: '20/06/2020',
-          userProfileUrl: 'https://example.com/user4.jpg',
-          comment: 'Great service, very responsive.',
-        ),
-      ];
-
-      reviews.assignAll(fetchedReviews);
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to load reviews');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  void submitReview() async {
-    final newReview = reviewController.text;
-
-    if (newReview.isEmpty) {
-      Get.snackbar('Error', 'Please write a review before submitting.');
-      return;
-    }
-
-    try {
-      // Simulate sending new review to the database
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Assuming the user submitting is 'Current User' for now
-      reviews.add(
-        Review(
-          userName: 'Current User',
-          date: 'Today',
-          userProfileUrl: 'https://example.com/current_user.jpg',
-          comment: newReview,
-        ),
-      );
-      reviewController.clear(); // Clear the text field after submission
-      Get.snackbar('Success', 'Your review has been submitted successfully!');
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to submit review');
-    }
-  }
-}
-
-class Review {
-  final String userName;
-  final String date;
-  final String userProfileUrl;
-  final String comment;
-
-  Review({
-    required this.userName,
-    required this.date,
-    required this.userProfileUrl,
-    required this.comment,
-  });
 }

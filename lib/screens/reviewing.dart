@@ -1,20 +1,26 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gap/gap.dart';
 import 'package:get/get.dart';
-import 'package:resturant_app/screens/comment_screen.dart';
 
+import 'package:resturant_app/screens/comment_screen.dart';
+import 'package:resturant_app/utils/model.dart';
 
 class RateOrderScreen extends StatelessWidget {
-  RateOrderScreen({super.key});
+  RateOrderScreen({
+    Key? key,
+    required this.meal,
+  }) : super(key: key);
+  final Meals meal;
 
   final TextEditingController reviewController = TextEditingController();
 
   final rating = 2.5.obs;
 
-  final checkboxItems = <String>[
+   final checkboxItems = <String>[
     'Add pepper',
     'Add salt',
     'Add ketchup',
@@ -47,7 +53,7 @@ class RateOrderScreen extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(20.0),
                 child: Image.network(
-                  'https://cdn11.bigcommerce.com/s-3xaaslonk2/images/stencil/500x659/products/131/1030/376__03833.1660073838.jpg?c=1',
+                  meal.imageUrl ?? '',
                   // <-- Replace with your image directory
                   height: 180,
                   width: double.infinity,
@@ -56,9 +62,9 @@ class RateOrderScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16.0),
 
-              const Text(
-                'How was your last order beef burger?',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+               Text(
+                'How was your ${meal.name} order ?',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8.0),
 
@@ -207,10 +213,10 @@ class RateOrderScreen extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => ReviewScreen()
-                          )
-                          );
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ReviewScreen(food: meal,)));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.lightBlue,

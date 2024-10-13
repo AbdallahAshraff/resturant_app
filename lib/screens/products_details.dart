@@ -108,7 +108,7 @@ class ProductDetails extends StatelessWidget {
           TextButton(
             onPressed: () {
               // Handle add review logic here
-             Navigator.of(context).push(MaterialPageRoute(builder: (context) => RateOrderScreen() ));
+             Navigator.of(context).push(MaterialPageRoute(builder: (context) => RateOrderScreen(meal: food,) ));
             },
             child: const Text(
               'Add Review',
