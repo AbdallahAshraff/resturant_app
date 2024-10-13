@@ -1,5 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -7,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 
 import 'package:resturant_app/screens/comment_screen.dart';
+import 'package:resturant_app/utils/data.dart';
 import 'package:resturant_app/utils/model.dart';
 
 class RateOrderScreen extends StatelessWidget {
@@ -14,21 +13,14 @@ class RateOrderScreen extends StatelessWidget {
     Key? key,
     required this.meal,
   }) : super(key: key);
-  final Meals meal;
 
+  final Meals meal;
   final TextEditingController reviewController = TextEditingController();
 
   final rating = 2.5.obs;
 
-   final checkboxItems = <String>[
-    'Add pepper',
-    'Add salt',
-    'Add ketchup',
-    'Add mayonnaise'
-  ];
-
-  // RxList for checkbox values to make them reactive
-  final RxList<bool> checkboxValues = List.filled(4, false).obs;
+  // RxList for checkbox values
+  late RxList<bool> checkboxValues;
 
   @override
   Widget build(BuildContext context) {
@@ -41,20 +33,17 @@ class RateOrderScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      // This property ensures the screen adjusts when the keyboard is opened
       resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
-        // Wrap with SingleChildScrollView to make it scrollable
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Food Image (Local Directory Version)
+              // Food Image
               ClipRRect(
                 borderRadius: BorderRadius.circular(20.0),
                 child: Image.network(
                   meal.imageUrl ?? '',
-                  // <-- Replace with your image directory
                   height: 180,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -62,9 +51,10 @@ class RateOrderScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16.0),
 
-               Text(
-                'How was your ${meal.name} order ?',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                'How was your ${meal.name} order?',
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8.0),
 
@@ -87,7 +77,6 @@ class RateOrderScreen extends StatelessWidget {
               const SizedBox(height: 16.0),
               Obx(() {
                 String ratingText;
-
                 if (rating.value > 1 && rating.value < 2.5) {
                   ratingText = 'Bad';
                 } else if (rating.value >= 2.5 && rating.value < 3.5) {
@@ -106,38 +95,60 @@ class RateOrderScreen extends StatelessWidget {
               }),
 
               const Gap(20),
+               const Text(
+                'What would you like to add to the meal?',
+                style:
+                    TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8.0),  
 
-              // Reactive Row with CheckboxListTile
-              Obx(() => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      for (var i = 0; i < checkboxItems.length - 2; i++)
-                        Expanded(
-                          child: CheckboxListTile(
-                            value: checkboxValues[i],
-                            onChanged: (v) {
-                              checkboxValues[i] = v!; // Update the RxList
-                            },
-                            title: Text(checkboxItems[i]),
-                          ),
-                        ),
-                    ],
-                  )),
-              Obx(() => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      for (var i = 2; i < checkboxItems.length; i++)
-                        Expanded(
-                          child: CheckboxListTile(
-                            value: checkboxValues[i],
-                            onChanged: (v) {
-                              checkboxValues[i] = v!; // Update the RxList
-                            },
-                            title: Text(checkboxItems[i]),
-                          ),
-                        ),
-                    ],
-                  )),
+              // Checkbox List
+              FutureBuilder<List<Additions>>(
+                future: fetchAdditions(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  }
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Text('No additions found.');
+                  }
+
+                  final fetchedAdditions = snapshot.data!;
+
+                  // Initialize checkbox values based on fetched additions
+                  checkboxValues = List.filled(fetchedAdditions.length, false).obs;
+
+                  // Filter additions based on meal ID
+                  final filteredAdditions = fetchedAdditions
+                      .where((addition) => addition.mealId == meal.id)
+                      .toList();
+
+                  if (filteredAdditions.isEmpty) {
+                    return const Text('No additions available for this meal.');
+                  }
+
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: filteredAdditions.length,
+                    itemBuilder: (context, index) {
+                      final addition = filteredAdditions[index];
+                      return Obx(() {
+                        return CheckboxListTile(
+                          value: checkboxValues[index],
+                          onChanged: (value) {
+                            checkboxValues[index] = value!;
+                            checkboxValues.refresh(); // Refresh state
+                          },
+                          title: Text(addition.additionDescription),
+                        );
+                      });
+                    },
+                  );
+                },
+              ),
 
               const Gap(20),
 
@@ -154,81 +165,79 @@ class RateOrderScreen extends StatelessWidget {
               ),
               const Gap(16),
 
-              // Submit Button
+              // Submit and Reviews Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      // Submit to the database logic here (can be implemented later)
-
                       final commentReview = reviewController.text;
+                      if (commentReview.isNotEmpty) {
+                         final toastMessage =
+                          'Submitted: $commentReview, Rating: ${rating.value}';
+                      Fluttertoast.showToast(
+                        msg: toastMessage,
+                        toastLength: Toast.LENGTH_LONG,
+                        gravity: ToastGravity.BOTTOM,
+                        backgroundColor: Colors.blue,
+                        textColor: Colors.white,
+                        fontSize: 16.0,
+                      );
 
-                      if (kDebugMode) {
+                      if (rating.value > 3.5) {
                         Fluttertoast.showToast(
-                            msg:
-                                'Submitted: ${reviewController.text}, Rating: ${rating.value}, Checkbox Values: $checkboxValues',
-                            toastLength: Toast.LENGTH_LONG,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIosWeb: 3,
-                            backgroundColor: Colors.blue,
-                            textColor: Colors.white,
-                            fontSize: 16.0);
-                      }
-
-                      if (rating > 3.5) {
-                        Fluttertoast.showToast(
-                            msg:
-                                "Thank you for your review and for visiting our restaurant.",
-                            toastLength: Toast.LENGTH_LONG,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIosWeb: 3,
-                            backgroundColor: Colors.blue,
-                            textColor: Colors.white,
-                            fontSize: 16.0);
+                          msg: "Thank you for your review!",
+                          backgroundColor: Colors.green,
+                        );
                       } else {
                         Fluttertoast.showToast(
-                            msg:
-                                "Thank you for your evaluation, and we promise to take it into consideration.",
-                            toastLength: Toast.LENGTH_LONG,
-                            gravity: ToastGravity.BOTTOM,
-                            timeInSecForIosWeb: 3,
-                            backgroundColor: Colors.blue,
-                            textColor: Colors.white,
-                            fontSize: 16.0);
+                          msg: "We value your feedback and will improve!",
+                          backgroundColor: Colors.red,
+                        );
                       }
 
-                      reviewController.clear();
+                      reviewController.clear();  
+                      }
+                       else {
+                        Fluttertoast.showToast(
+                          msg: "Please write a review!",
+                          backgroundColor: Colors.red,
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 40,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20.0),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 40),
                     ),
-                    child: const Text('Submit', style: TextStyle(fontSize: 16)),
+                    child: const Text('Submit', style: TextStyle(fontSize: 16 , color: Colors.white) ),
                   ),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ReviewScreen(food: meal,)));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ReviewScreen(food: meal),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.lightBlue,
-                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 40,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20.0),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 40),
                     ),
                     child:
-                        const Text('Reviews', style: TextStyle(fontSize: 16)),
+                        const Text('Reviews', style: TextStyle(fontSize: 16 , color: Colors.white) ),
                   ),
                 ],
               ),

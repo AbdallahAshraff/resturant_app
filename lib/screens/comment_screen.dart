@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:resturant_app/utils/constants.dart';
 import 'package:resturant_app/utils/data.dart';

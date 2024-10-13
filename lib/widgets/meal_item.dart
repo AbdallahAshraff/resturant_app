@@ -92,10 +92,12 @@ class MealItem extends StatelessWidget {
             const SizedBox(
               width: 2,
             ),
-            /*Text(
-              data["rate"] + " (" + data["rate_number"] + ")",
+            Text(
+              "${meal.rate?.toStringAsFixed(1)}",
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontSize: 12, color: primary),
-            ),*/
+            ),
           ],
         )
       ],

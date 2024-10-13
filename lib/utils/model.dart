@@ -64,6 +64,7 @@ final String? description;
 final String? imageUrl;
 final DateTime? createdAt;
 final num? price;
+final double? rate;
 
 const Meals({
 required this.id,
@@ -72,6 +73,7 @@ this.description,
 this.imageUrl,
 this.createdAt,
 this.price,
+this.rate,
 });
 
 static String get table_name => 'meals';
@@ -81,6 +83,7 @@ static String get c_description => 'description';
 static String get c_imageUrl => 'image_url';
 static String get c_createdAt => 'created_at';
 static String get c_price => 'price';
+static String get c_rate => 'rate';
 
 static List<Meals> converter(List<Map<String, dynamic>> data) {
   return data.map(Meals.fromJson).toList();
@@ -95,6 +98,7 @@ String? description,
 String? imageUrl,
 DateTime? createdAt,
 num? price,
+double? rate,
 }) {
 return {
 if (id != null) 'id': id,
@@ -103,6 +107,7 @@ if (description != null) 'description': description,
 if (imageUrl != null) 'image_url': imageUrl,
 if (createdAt != null) 'created_at': createdAt.toIso8601String(),
 if (price != null) 'price': price.toString(),
+if (rate != null) 'rate': rate,
 };
 }
 static Map<String, dynamic> insert({
@@ -112,6 +117,7 @@ static Map<String, dynamic> insert({
   String? imageUrl,
   DateTime? createdAt,
   num? price,
+  double? rate,
 }) {
 return _generateMap(
   id: id,
@@ -120,6 +126,7 @@ return _generateMap(
   imageUrl: imageUrl,
   createdAt: createdAt,
   price: price,
+  rate: rate,
 );
 }
 static Map<String, dynamic> update({
@@ -129,6 +136,7 @@ String? description,
 String? imageUrl,
 DateTime? createdAt,
 num? price,
+double? rate,
 }) {
 return _generateMap(
   id: id,
@@ -137,6 +145,7 @@ return _generateMap(
   imageUrl: imageUrl,
   createdAt: createdAt,
   price: price,
+  rate: rate,
 );
 }
 factory Meals.fromJson(Map<String, dynamic> jsonn) {
@@ -147,6 +156,7 @@ description: jsonn['description'] != null ? jsonn['description'].toString() : ''
 imageUrl: jsonn['image_url'] != null ? jsonn['image_url'].toString() : '',
 createdAt: jsonn['created_at'] != null ? DateTime.parse(jsonn['created_at'].toString()) : DateTime.fromMillisecondsSinceEpoch(0),
 price: jsonn['price'] != null ? num.parse(jsonn['price'].toString()) : 0,
+rate: jsonn['rate'] != null ? double.parse(jsonn['rate'].toString()) : 0.0,
 );
 }
 
@@ -158,6 +168,7 @@ return _generateMap(
   imageUrl: imageUrl,
   createdAt: createdAt,
   price: price,
+  rate: rate,
 );
 }
 Meals copyWith({
@@ -167,6 +178,7 @@ String? description,
 String? imageUrl,
 DateTime? createdAt,
 num? price,
+double? rate,
 }) {
 return Meals(
 id: id ?? this.id,
@@ -175,6 +187,7 @@ description: description ?? this.description,
 imageUrl: imageUrl ?? this.imageUrl,
 createdAt: createdAt ?? this.createdAt,
 price: price ?? this.price,
+rate: rate ?? this.rate,
 );
 }
 

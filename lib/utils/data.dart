@@ -109,3 +109,8 @@ Future<List<Comments>> fetchComments() async {
   final response = await supabase.from('comments').select();
   return Comments.converter(response);
 }
+
+Future<List<Additions>> fetchAdditions() async {
+  final response = await supabase.from('additions').select();
+  return Additions.converter(response);
+}

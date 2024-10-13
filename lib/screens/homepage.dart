@@ -53,59 +53,43 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  _buildBody(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 15, right: 15),
-            child: Text(
-              "Hello!",
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-            ),
+  Widget _buildBody(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          child: Text(
+            "Hello!",
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
-          const SizedBox(
-            height: 10,
+        ),
+        const SizedBox(height: 10),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          child: Text(
+            "Find Your Meals",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const Padding(
-            padding: EdgeInsets.only(left: 15, right: 15),
-            child: Text(
-              "Find Your Meals",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+        ),
+        const SizedBox(height: 20),
+        _buildAdsImage(),
+        const SizedBox(height: 25),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          child: Text(
+            "Our Meals",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(
-            height: 20,
-          ),
-          _buildAdsImage(),
-          const SizedBox(
-            height: 25,
-          ),
-          const Padding(
-            padding: EdgeInsets.only(left: 15, right: 15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Our Meals",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 5,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15),
+        ),
+        const SizedBox(height: 5),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15),
             child: _buildFeatured(context),
           ),
-          const SizedBox(
-            height: 20,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -126,37 +110,39 @@ class Homepage extends StatelessWidget {
     );
   }
 
-  _buildFeatured(BuildContext context) {
-    return Column(
-      children: [
-        FutureBuilder(
-          future: fetchMeals(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final meals = snapshot.data as List<Meals>;
-              return ListView.builder(
-                shrinkWrap:
-                    true, // Add this to make the ListView work inside a Column
-                itemCount: meals.length,
-                itemBuilder: (context, index) {
-                  final meal = meals[index];
-                  return MealItem(meal: meal ,onTap: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ProductDetails(meal),
-                      ),
-                    );
-                  });
-                },
-              );
-            } else {
-              return Center(child: CircularProgressIndicator());
-            }
+  Widget _buildFeatured(BuildContext context) {
+    return FutureBuilder<List<Meals>>(
+      future: fetchMeals(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No meals found.'));
+        }
+
+        final meals = snapshot.data!;
+        return ListView.builder(
+          itemCount: meals.length,
+          itemBuilder: (context, index) {
+            final meal = meals[index];
+            return MealItem(
+              meal: meal,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProductDetails(meal),
+                  ),
+                );
+              },
+            );
           },
-        ),
-      ],
+        );
+      },
     );
   }
 }

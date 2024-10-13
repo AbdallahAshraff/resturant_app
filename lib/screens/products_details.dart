@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:resturant_app/screens/comment_screen.dart';
 import 'package:resturant_app/screens/reviewing.dart';
 import 'package:resturant_app/utils/model.dart';
 
@@ -95,15 +96,22 @@ class ProductDetails extends StatelessWidget {
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             );
           }),
-          Row(
-            children: [
-              const Icon(Icons.star, color: Colors.orange, size: 20),
-              const SizedBox(width: 5),
-             /* Text(
-                '${product['rate']} (${product['rate_number']} reviews)',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-              ),*/
-            ],
+          GestureDetector(
+            onTap: () {
+               Navigator.of(context).push(MaterialPageRoute(builder: (context) => ReviewScreen(food: food,)));
+            },
+            child: Row(
+              children: [
+                const Icon(Icons.star, color: Colors.orange, size: 20),
+                const SizedBox(width: 5),
+                Text(
+                  '${food.rate?.toStringAsFixed(1)}',
+                   style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  ),
+                 
+                
+              ],
+            ),
           ),
           TextButton(
             onPressed: () {
